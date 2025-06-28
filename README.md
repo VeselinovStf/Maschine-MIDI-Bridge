@@ -1,0 +1,201 @@
+# 🎹 Melodics ⇄ Maschine MIDI Bridge
+
+## Motivation
+
+ Native Instruments Maschine — like many modern MIDI controllers — is designed to work seamlessly with its own software. However, when used with third-party applications like Melodics, users often notice that pad sensitivity and responsiveness degrade, especially when trying to play lightly or with expressive dynamics.
+
+This is a well-known issue:
+
+    ❗ Out of the native software environment, pad hits may feel less responsive, leading to missed hits, double triggers, or fatigue from needing to strike harder than necessary.
+
+This script bridges that gap.
+
+Inspired by classical piano techniques — especially those taught by Chopin, where touch and finger pressure are central — the goal of this bridge is to make your hand movement as minimal and expressive as possible, while ensuring reliable MIDI triggering and visual feedback from Melodics.
+Why?
+
+    ✅ Accurate response with soft playing — no need to smash the pads.
+
+    ✅ Feedback lighting from Melodics to Maschine — as close as possible to native experience.
+
+    ✅ More expressive performance — important in finger drumming and rhythm training.
+
+By forwarding MIDI in a smart and filtered way, this bridge makes Maschine behave more like it does inside its native environment — while being fully functional with Melodics.
+
+This script bridges MIDI communication between Native Instruments **Maschine MK3** and **Melodics**, allowing you to:
+
+- Play pads on Maschine and trigger lessons in Melodics.
+- Get visual pad feedback (lights) from Melodics back to Maschine.
+- Auto-detect ports, optionally show debug output, and self-install dependencies.
+
+## Links
+- [Chopin method](https://www.youtube.com/watch?v=ctWUmDLATJw&embeds_referring_euri=https%3A%2F%2Ftonesharp.com%2F&source_ve_path=Mjg2NjY)
+- [Blog post](https://tonesharp.com/blog/2025/05/31/finger-drumming-pad-hitting-techniques)
+---
+
+## NOTE
+- for best result use .exe version
+
+## NI Control Editor Settings
+
+- pads must be set from C3 to D#4 notes
+- For all pads! Hit must be set on Channel 1 
+- For all pads! Press must be set on channel 2 with treshold of you liking 
+- Tested with: Pad velocity curve Soft3 with Press threshold 0 and Pads Sensitivity to max!
+  
+## 📦 Requirements
+
+This script uses:
+
+- Python 3.7+
+- `mido` – MIDI library for Python  
+- `python-rtmidi` – MIDI backend
+
+## Install them manually:
+
+- pip install mido python-rtmidi
+
+## Or use the built-in installer (see below).
+
+1. Clone this repo
+2. Run the script:
+
+- python melodics-maschine.py
+
+## Config
+- The CLI version of script needs config.json as source of configuration
+    - The configuration represents witch range of notes to redirect and for whitch ports to search
+    - This way user can change port names and eaven use different controller!
+- Currently in the .exe version of script all this are hardcoded in code, so change must be done manually 
+  
+```
+{
+    "NOTE_MIN": 48,
+    "NOTE_MAX": 75,
+    "patterns": {
+        "maschine_in_port": "^Maschine MK3 Ctrl MIDI \\d+$",
+        "melodics_in_port": "^loopMIDI IN \\d+$",
+        "melodics_out_port": "^loopMIDI OUT \\d+$",
+        "maschine_out_port": "^Maschine MK3 Ctrl MIDI \\d+$"
+    }
+}
+```
+
+### To enable debug output:
+
+- python melodics-maschine.py --debug
+
+- If required packages are missing, the script will install them automatically
+  
+## 🧠 How It Works
+
+- The script runs two threads:
+    - Maschine → Melodics
+        - Listens to pad hits from the physical Maschine MK3 Ctrl MIDI input and forwards valid notes to loopMIDI IN, which Melodics reads.
+    - Melodics → Maschine
+        - Listens to feedback from loopMIDI OUT and sends those messages to Maschine MK3 Ctrl MIDI output to light up pads.
+
+    - The script only forwards MIDI NoteOn/NoteOff in the C3–D#4 range (MIDI 48–75), Channel 1 → Channel 0, and also handles control changes.
+
+## 🎛️ Port Auto-Detection
+
+- The script auto-detects ports using regular expressions:
+
+```
+Logical Name	Match Pattern	Direction
+maschine_in_port	Maschine MK3 Ctrl MIDI \d+	MIDI IN
+melodics_in_port	loopMIDI IN \d+	MIDI OUT
+melodics_out_port	loopMIDI OUT \d+	MIDI IN
+maschine_out_port	Maschine MK3 Ctrl MIDI \d+	MIDI OUT
+
+```
+
+- If any port can't be found, the script will raise an error and print which one is missing.
+
+## 🧪 Debug Mode
+
+- Use the --debug flag to see:
+    - Detected MIDI ports
+    - Each forwarded or filtered MIDI message
+
+## 🛑 Exit
+
+- Press Ctrl+C in your terminal to stop the bridge safely.
+
+## 📝 Customization
+
+- You can modify the following constants in the script:
+
+```
+NOTE_MIN = 48  # Lowest note (C3)
+NOTE_MAX = 75  # Highest note (D#4)
+
+```
+
+## 💡 Tip: loopMIDI Setup
+
+- Make sure loopMIDI is installed and you have created:
+
+   - One loopMIDI IN port
+
+   - One loopMIDI OUT port
+
+- Melodics must be configured to:
+
+   - Receive input from loopMIDI IN
+
+    - Send output to loopMIDI OUT
+
+## Background Tray App (.EXE Build for Windows)
+
+- You can convert this script into a Windows .exe app that:
+
+    - Runs in the background
+
+    - Hides the terminal window
+
+    - Shows a system tray icon
+
+    - Lets you right-click to exit
+
+### 📦 Additional Requirements
+
+- To support the tray icon, install:
+  
+```
+pip install pystray pillow
+pip install pyinstaller
+
+```
+
+## Install Tray App
+
+```
+pip install -r requirements.txt
+pyinstaller --noconsole --onefile .\melodics-maschine-tray.py
+
+```
+
+## Run at Start Up
+
+- for Windows create Shortcut at: C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+- Short cut must point to your created exe
+
+## Melodics Setup
+
+- Create Template at: C:\Users\<USER_NAME>\AppData\Local\Melodics\Melodics\devices
+  - Follow rtf guidence
+  - set in/out port to loop midi
+- In App: Select User device under Settings 
+
+## 🧰 Troubleshooting
+- ❌ OSError: unknown port
+
+- Make sure the loopMIDI or Maschine ports are created and visible before running the script.
+
+## 🔄 Port Numbers Keep Changing?
+
+- No problem — the script matches ports by name pattern, not number.
+
+## © License
+
+MIT – Use freely, credit appreciated.

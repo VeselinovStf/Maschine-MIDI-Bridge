@@ -1,0 +1,10 @@
+{
+    "NOTE_MIN": 48,
+    "NOTE_MAX": 75,
+    "patterns": {
+        "maschine_in_port": "^Maschine MK3 Ctrl MIDI \\d+$",
+        "melodics_in_port": "^loopMIDI IN \\d+$",
+        "melodics_out_port": "^loopMIDI OUT \\d+$",
+        "maschine_out_port": "^Maschine MK3 Ctrl MIDI \\d+$"
+    }
+}

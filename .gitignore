@@ -11,6 +11,10 @@
 *.sln.docstates
 *.env
 
+build/
+dist/
+melodics-maschine-tray.spec
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
