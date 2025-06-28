@@ -5,19 +5,18 @@
  Native Instruments Maschine — like many modern MIDI controllers — is designed to work seamlessly with its own software. However, when used with third-party applications like Melodics, users often notice that pad sensitivity and responsiveness degrade, especially when trying to play lightly or with expressive dynamics.
 
 This is a well-known issue:
-
-    ❗ Out of the native software environment, pad hits may feel less responsive, leading to missed hits, double triggers, or fatigue from needing to strike harder than necessary.
+- Out of the native software environment, pad hits may feel less responsive, leading to missed hits, double triggers, or fatigue from needing to strike harder than necessary.
 
 This script bridges that gap.
 
 Inspired by classical piano techniques — especially those taught by Chopin, where touch and finger pressure are central — the goal of this bridge is to make your hand movement as minimal and expressive as possible, while ensuring reliable MIDI triggering and visual feedback from Melodics.
 Why?
 
-    ✅ Accurate response with soft playing — no need to smash the pads.
+- ✅ Accurate response with soft playing — no need to smash the pads.
 
-    ✅ Feedback lighting from Melodics to Maschine — as close as possible to native experience.
+- ✅ Feedback lighting from Melodics to Maschine — as close as possible to native experience.
 
-    ✅ More expressive performance — important in finger drumming and rhythm training.
+- ✅ More expressive performance — important in finger drumming and rhythm training.
 
 By forwarding MIDI in a smart and filtered way, this bridge makes Maschine behave more like it does inside its native environment — while being fully functional with Melodics.
 
@@ -65,7 +64,6 @@ This script uses:
 - The CLI version of script needs config.json as source of configuration
     - The configuration represents witch range of notes to redirect and for whitch ports to search
     - This way user can change port names and eaven use different controller!
-- Currently in the .exe version of script all this are hardcoded in code, so change must be done manually 
   
 ```
 {
@@ -79,6 +77,8 @@ This script uses:
     }
 }
 ```
+
+- Note that currently in the .exe version of script all envs are hardcoded, so change must be done manually 
 
 ### To enable debug output:
 
@@ -94,7 +94,7 @@ This script uses:
     - Melodics → Maschine
         - Listens to feedback from loopMIDI OUT and sends those messages to Maschine MK3 Ctrl MIDI output to light up pads.
 
-    - The script only forwards MIDI NoteOn/NoteOff in the C3–D#4 range (MIDI 48–75), Channel 1 → Channel 0, and also handles control changes.
+    - The script only forwards MIDI NoteOn/NoteOff in the C3–D#4 range (MIDI 48–75), Channel 2 → Channel 1, and also handles control changes.
 
 ## 🎛️ Port Auto-Detection
 
@@ -111,19 +111,19 @@ maschine_out_port	Maschine MK3 Ctrl MIDI \d+	MIDI OUT
 
 - If any port can't be found, the script will raise an error and print which one is missing.
 
-## 🧪 Debug Mode
+## 🧪 Debug Mode ( CLI version )
 
 - Use the --debug flag to see:
     - Detected MIDI ports
     - Each forwarded or filtered MIDI message
 
-## 🛑 Exit
+## 🛑 Exit  ( CLI version )
 
 - Press Ctrl+C in your terminal to stop the bridge safely.
 
 ## 📝 Customization
 
-- You can modify the following constants in the script:
+- You can modify the following constants in the script ( CLI script uses config.json ):
 
 ```
 NOTE_MIN = 48  # Lowest note (C3)
@@ -177,20 +177,30 @@ pyinstaller --noconsole --onefile .\melodics-maschine-tray.py
 
 ## Run at Start Up
 
-- for Windows create Shortcut at: C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+- for Windows create Shortcut at: 
+
+```
+C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+```
+
 - Short cut must point to your created exe
 
 ## Melodics Setup
 
-- Create Template at: C:\Users\<USER_NAME>\AppData\Local\Melodics\Melodics\devices
-  - Follow rtf guidence
-  - set in/out port to loop midi
+- Create Template at: 
+
+```
+  C:\Users\<USER_NAME>\AppData\Local\Melodics\Melodics\devices
+```
+- Follow .rtf guidence
+    - set in/out port to loop midi
 - In App: Select User device under Settings 
 
 ## 🧰 Troubleshooting
 - ❌ OSError: unknown port
 
 - Make sure the loopMIDI or Maschine ports are created and visible before running the script.
+- Swithing Device in Melodics may result with loopMidi muted channel - close the app, restart chanell 
 
 ## 🔄 Port Numbers Keep Changing?
 
