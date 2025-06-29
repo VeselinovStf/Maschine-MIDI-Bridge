@@ -41,8 +41,17 @@ This script bridges MIDI communication between Native Instruments **Maschine MK3
 ## NI Control Editor Settings
 
 - pads must be set from C3 to D#4 notes
+
+![Hit Setting](images/mk3Hit.png)
+
 - For all pads! Hit must be set on Channel 1 
+
+![Press Setting](images/mk3Press.png)
+
 - For all pads! Press must be set on channel 2 with treshold of you liking 
+
+![General](images/mk3Pref.png)
+
 - Tested with: Pad velocity curve Soft3 with Press threshold 2 and Pads Sensitivity to max!
   
 ## 📦 Requirements
@@ -139,6 +148,8 @@ NOTE_MAX = 75  # Highest note (D#4)
 ```
 
 ## 💡 Tip: loopMIDI Setup
+
+![loopMidi Set Up](images/loopMidiSetUp.png)
 
 - Make sure loopMIDI is installed and you have created:
    - One loopMIDI IN port
