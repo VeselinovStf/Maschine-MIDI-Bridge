@@ -36,7 +36,7 @@ This script bridges MIDI communication between Native Instruments **Maschine MK3
 
 ## RELEASES
 
--[MelodicsMashine v1.01 EXE app](https://github.com/VeselinovStf/Maschine-MIDI-Bridge/releases/tag/v1.0.1)
+- [MelodicsMashine v1.01 EXE app](https://github.com/VeselinovStf/Maschine-MIDI-Bridge/releases/tag/v1.0.1)
 
 ## NI Control Editor Settings
 
