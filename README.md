@@ -34,12 +34,16 @@ This script bridges MIDI communication between Native Instruments **Maschine MK3
 ## NOTE
 - for best result use .exe version
 
+## RELEASES
+
+- [MelodicsMashine v1.01 EXE app](https://github.com/VeselinovStf/Maschine-MIDI-Bridge/releases/tag/v1.0.1)
+
 ## NI Control Editor Settings
 
 - pads must be set from C3 to D#4 notes
 - For all pads! Hit must be set on Channel 1 
 - For all pads! Press must be set on channel 2 with treshold of you liking 
-- Tested with: Pad velocity curve Soft3 with Press threshold 0 and Pads Sensitivity to max!
+- Tested with: Pad velocity curve Soft3 with Press threshold 2 and Pads Sensitivity to max!
   
 ## 📦 Requirements
 
@@ -48,6 +52,8 @@ This script uses:
 - Python 3.7+
 - `mido` – MIDI library for Python  
 - `python-rtmidi` – MIDI backend
+- loopMidi - for port forwarding
+- Melodics configuration
 
 ## Install them manually:
 
