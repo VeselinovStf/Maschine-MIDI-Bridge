@@ -7,21 +7,14 @@ import argparse
 import subprocess
 import sys
 import json
+import time
+from collections import defaultdict
 
+# rtmidi is one of the most reliable and cross-platform backends (based on the C++ RtMidi library).
 mido.set_backend('mido.backends.rtmidi')
 
-# Ports
-# maschine_in_port = 'Maschine MK3 Ctrl MIDI 2'   # Physical Maschine input (pad hits)
-# melodics_in_port = 'loopMIDI IN 4'              # Melodics input (receives from script)
-# melodics_out_port = 'loopMIDI OUT 4'            # Melodics output (feedback to script)
-# maschine_out_port = 'Maschine MK3 Ctrl MIDI 3'  # Maschine output (pad lights)
-
-# Load external configuration
-def load_config(path='config.json'):
-    with open(path, 'r') as f:
-        return json.load(f)
-
 # Setup argument parser
+# --debug sets logging on
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', action='store_true', help='Enable debug output')
 args = parser.parse_args()
@@ -29,6 +22,27 @@ args = parser.parse_args()
 # Set DEBUG based on command line arg
 DEBUG = args.debug
 
+# Load external configuration
+# Load config.json
+# {
+#     "NOTE_MIN": 48,
+#     "NOTE_MAX": 75,
+#     "patterns": {
+#         "maschine_in_port": "^Maschine MK3 Ctrl MIDI \\d+$",
+#         "melodics_in_port": "^loopMIDI IN \\d+$",
+#         "melodics_out_port": "^loopMIDI OUT \\d+$",
+#         "maschine_out_port": "^Maschine MK3 Ctrl MIDI \\d+$"
+#     }
+# }
+# maschine_in_port = 'Maschine MK3 Ctrl MIDI 2'   # Physical Maschine input (pad hits)
+# melodics_in_port = 'loopMIDI IN 4'              # Melodics input (receives from script)
+# melodics_out_port = 'loopMIDI OUT 4'            # Melodics output (feedback to script)
+# maschine_out_port = 'Maschine MK3 Ctrl MIDI 3'  # Maschine output (pad lights)
+def load_config(path='config.json'):
+    with open(path, 'r') as f:
+        return json.load(f)
+
+# Installing dependencies from requirement.txt file
 def install_requirements():
     try:
         import mido, rtmidi  # Attempt to import
@@ -38,10 +52,12 @@ def install_requirements():
         print("✅ Done. Please restart the script.")
         sys.exit()
 
+# Debugging logger
 def debug_print(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
 
+# Searches and sets required ports by config.json regexes
 def find_ports():
     # Patterns to match (case sensitive)
     patterns = config['patterns']
@@ -92,45 +108,11 @@ def find_ports():
 
     return maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port
 
-
-def forward_to_melodics():
-    NOTE_MIN = config.get('NOTE_MIN', 48)
-    NOTE_MAX = config.get('NOTE_MAX', 75)
-
-    """Listen to Maschine input, filter and send to Melodics."""
-    try:
-        with mido.open_input(maschine_in_port) as inport, mido.open_output(melodics_in_port) as outport:
-            debug_print(f"Listening on Maschine input '{maschine_in_port}', forwarding to Melodics '{melodics_in_port}'...")
-            while True:
-                for msg in inport.iter_pending():
-                    # Convert note_on with velocity 0 to note_off
-                    if msg.type == 'note_on' and msg.velocity == 0:
-                        msg = mido.Message('note_off', note=msg.note, velocity=0, channel=msg.channel)
-                    
-                    # Filter by channel and note range
-                    if msg.type in ['note_on', 'note_off'] and msg.channel == 1 and NOTE_MIN <= msg.note <= NOTE_MAX:
-                        msg.channel = 0  # Adjust channel for Melodics if needed
-                        debug_print(f"[Maschine→Melodics] Forwarding {msg}")
-                        outport.send(msg)
-                    elif msg.type == 'control_change':
-                        msg.channel = 0
-                        debug_print(f"[Maschine→Melodics] Forwarding CC {msg}")
-                        outport.send(msg)
-                    else:
-                        debug_print(f"[Maschine→Melodics] Ignored {msg}")
-                time.sleep(0.001)
-    except KeyboardInterrupt:
-        debug_print("\n[Maschine→Melodics] Stopped.")
-
-import time
-from collections import defaultdict
-
-
-
+# Forwards from maschine to melodics 
 def forward_to_melodics():
     # Track last event time per note
     recent_notes = defaultdict(lambda: 0)
-    DEBOUNCE_MS = 0.04  # 40 milliseconds
+    DEBOUNCE_MS = config.get('DEBOUNCE_MS', 0.04)
 
     NOTE_MIN = config.get('NOTE_MIN', 48)
     NOTE_MAX = config.get('NOTE_MAX', 75)
@@ -176,7 +158,7 @@ def forward_to_melodics():
     except KeyboardInterrupt:
         debug_print("\n[Maschine→Melodics] Stopped.")
 
-
+# Forwards from melodics to maschine
 def forward_to_maschine():
     """Listen to Melodics output and forward to Maschine output for pad lights."""
     try:

@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 *.env
+*.spec
 
 build/
 dist/

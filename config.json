@@ -1,4 +1,5 @@
 {
+    "DEBOUNCE_MS": 0.04,
     "NOTE_MIN": 48,
     "NOTE_MAX": 75,
     "patterns": {

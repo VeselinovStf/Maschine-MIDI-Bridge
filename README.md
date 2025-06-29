@@ -62,11 +62,13 @@ This script uses:
 
 ## Config
 - The CLI version of script needs config.json as source of configuration
+    - DEBOUNCE_MS setting for port note read time 
     - The configuration represents witch range of notes to redirect and for whitch ports to search
     - This way user can change port names and eaven use different controller!
   
 ```
 {
+    "DEBOUNCE_MS": 0.04,
     "NOTE_MIN": 48,
     "NOTE_MAX": 75,
     "patterns": {
@@ -77,8 +79,6 @@ This script uses:
     }
 }
 ```
-
-- Note that currently in the .exe version of script all envs are hardcoded, so change must be done manually 
 
 ### To enable debug output:
 
@@ -95,7 +95,8 @@ This script uses:
         - Listens to feedback from loopMIDI OUT and sends those messages to Maschine MK3 Ctrl MIDI output to light up pads.
 
     - The script only forwards MIDI NoteOn/NoteOff in the C3–D#4 range (MIDI 48–75), Channel 2 → Channel 1, and also handles control changes.
-
+    - Note: mido ports are 0 base indexed
+  
 ## 🎛️ Port Auto-Detection
 
 - The script auto-detects ports using regular expressions:
@@ -134,28 +135,21 @@ NOTE_MAX = 75  # Highest note (D#4)
 ## 💡 Tip: loopMIDI Setup
 
 - Make sure loopMIDI is installed and you have created:
-
    - One loopMIDI IN port
-
    - One loopMIDI OUT port
-
 - Melodics must be configured to:
-
    - Receive input from loopMIDI IN
-
-    - Send output to loopMIDI OUT
+   - Send output to loopMIDI OUT
 
 ## Background Tray App (.EXE Build for Windows)
 
 - You can convert this script into a Windows .exe app that:
-
     - Runs in the background
-
     - Hides the terminal window
-
     - Shows a system tray icon
-
     - Lets you right-click to exit
+    - Detect if port is missing and shows message
+    - Restart option - curently closes the app
 
 ### 📦 Additional Requirements
 
@@ -171,9 +165,10 @@ pip install pyinstaller
 
 ```
 pip install -r requirements.txt
-pyinstaller --noconsole --onefile .\melodics-maschine-tray.py
+pyinstaller --noconsole --onefile .\melodics-maschine-tray.py --name=MelodicsMaschine_v1_01
 
 ```
+- NOTE: config.js and requirements.txt must be in same directory where .exe is placed!
 
 ## Run at Start Up
 
@@ -201,6 +196,11 @@ C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Start
 
 - Make sure the loopMIDI or Maschine ports are created and visible before running the script.
 - Swithing Device in Melodics may result with loopMidi muted channel - close the app, restart chanell 
+
+## BUGS
+
+- Turning of Maschine while Melodics is open and bringing back Maschine results in not forwarding light to Maschine
+- Some times changing device in Melodics may result in muted port in loopMidi
 
 ## 🔄 Port Numbers Keep Changing?
 
