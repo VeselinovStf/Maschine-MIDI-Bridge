@@ -167,6 +167,9 @@ def forward_to_melodics():
                         msg.channel = 0
                         debug_print(f"[Maschine→Melodics] Forwarding CC {msg}")
                         outport.send(msg)
+                    elif msg.type == 'sysex':
+                        debug_print(f"[Maschine→Melodics] Forwarding SysEx {msg}")
+                        outport.send(msg)
                     else:
                         debug_print(f"[Maschine→Melodics] Ignored {msg}")
                 time.sleep(0.001)
