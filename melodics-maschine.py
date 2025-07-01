@@ -25,6 +25,7 @@ DEBUG = args.debug
 # Load external configuration
 # Load config.json
 # {
+#     "DEBOUNCE_MS": 0.04,
 #     "NOTE_MIN": 48,
 #     "NOTE_MAX": 75,
 #     "patterns": {
@@ -48,119 +49,125 @@ def debug_print(*args, **kwargs):
         print(*args, **kwargs)
 
 # Searches and sets required ports by config.json regexes
-def find_ports():
-    # Patterns to match (case sensitive)
+def find_ports(retry_interval=5):
+    """Continuously tries to find the MIDI ports defined in config.json."""
+
+    debug_print("🎹 Available input ports:")
+    for p in input_ports:
+        debug_print(f"  - {p}")
+
+    debug_print("🎛 Available output ports:")
+    for p in output_ports:
+        debug_print(f"  - {p}")
+
     patterns = config['patterns']
 
-    input_ports = mido.get_input_names()
-    output_ports = mido.get_output_names()
+    while True:
+        input_ports = mido.get_input_names()
+        output_ports = mido.get_output_names()
 
-    # Find Maschine input port (physical Maschine Ctrl MIDI input)
-    maschine_in_port = None
-    for port in input_ports:
-        if re.match(patterns['maschine_in_port'], port):
-            maschine_in_port = port
-            break
+        # Try to match ports
+        maschine_in_port = next((p for p in input_ports if re.match(patterns['maschine_in_port'], p)), None)
+        melodics_in_port = next((p for p in output_ports if re.match(patterns['melodics_in_port'], p)), None)
+        melodics_out_port = next((p for p in input_ports if re.match(patterns['melodics_out_port'], p)), None)
+        maschine_out_port = next((p for p in output_ports if re.match(patterns['maschine_out_port'], p)), None)
 
-    # Find Melodics input port (loopMIDI IN) — this is where script sends data to Melodics
-    melodics_in_port = None
-    for port in output_ports:
-        if re.match(patterns['melodics_in_port'], port):
-            melodics_in_port = port
-            break
-
-    # Find Melodics output port (loopMIDI OUT) — feedback from Melodics to script
-    melodics_out_port = None
-    for port in input_ports:
-        if re.match(patterns['melodics_out_port'], port):
-            melodics_out_port = port
-            break
-
-    # Find Maschine output port (physical Maschine Ctrl MIDI output)
-    maschine_out_port = None
-    for port in output_ports:
-        if re.match(patterns['maschine_out_port'], port):
-            maschine_out_port = port
-            break
-
-    if None in [maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port]:
         missing = [name for name, val in zip(
             ['maschine_in_port', 'melodics_in_port', 'melodics_out_port', 'maschine_out_port'],
             [maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port]
         ) if val is None]
-        raise RuntimeError(f"Could not find the following MIDI ports: {', '.join(missing)}")
 
-    debug_print("Detected ports:")
-    debug_print(f"maschine_in_port = '{maschine_in_port}'")
-    debug_print(f"melodics_in_port = '{melodics_in_port}'")
-    debug_print(f"melodics_out_port = '{melodics_out_port}'")
-    debug_print(f"maschine_out_port = '{maschine_out_port}'")
+        if missing:
+            print(f"⚠️  Missing MIDI ports: {', '.join(missing)}")
+            print(f"🔁 Retrying in {retry_interval} seconds...\n")
+            time.sleep(retry_interval)
+        else:
+            debug_print("✅ Detected ports:")
+            debug_print(f"maschine_in_port = '{maschine_in_port}'")
+            debug_print(f"melodics_in_port = '{melodics_in_port}'")
+            debug_print(f"melodics_out_port = '{melodics_out_port}'")
+            debug_print(f"maschine_out_port = '{maschine_out_port}'")
 
-    return maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port
+            return maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port
 
 # Forwards from maschine to melodics 
 def forward_to_melodics():
-    # Track last event time per note
+    """Listen to Maschine input, filter and send to Melodics."""
     recent_notes = defaultdict(lambda: 0)
     DEBOUNCE_MS = config.get('DEBOUNCE_MS', 0.04)
-
     NOTE_MIN = config.get('NOTE_MIN', 48)
     NOTE_MAX = config.get('NOTE_MAX', 75)
 
-    """Listen to Maschine input, filter and send to Melodics."""
-    try:
-        with mido.open_input(maschine_in_port) as inport, mido.open_output(melodics_in_port) as outport:
-            debug_print(f"Listening on Maschine input '{maschine_in_port}', forwarding to Melodics '{melodics_in_port}'...")
+    while True:     
+        try:
+            with mido.open_input(maschine_in_port) as inport, mido.open_output(melodics_in_port) as outport:
+                debug_print(f"🎧 Listening on Maschine input '{maschine_in_port}', forwarding to Melodics '{melodics_in_port}'...")
 
-            while True:
-                for msg in inport.iter_pending():
-                    now = time.time()
+                while True:
+                    for msg in inport.iter_pending():
+                        now = time.time()
 
-                    # Convert note_on with velocity 0 to note_off
-                    if msg.type == 'note_on' and msg.velocity == 0:
-                        msg = mido.Message('note_off', note=msg.note, velocity=0, channel=msg.channel)
+                        # Convert note_on with velocity 0 to note_off
+                        if msg.type == 'note_on' and msg.velocity == 0:
+                            msg = mido.Message('note_off', note=msg.note, velocity=0, channel=msg.channel)
 
-                    if msg.type == 'note_off' and NOTE_MIN <= msg.note <= NOTE_MAX:
-                        msg.channel = 0
-                        debug_print(f"[Maschine→Melodics] Forwarding NOTE_OFF {msg}")
-                        outport.send(msg)
-                    # Only one of press/hit should trigger a send
-                    elif msg.type in ['note_on', 'note_off'] and NOTE_MIN <= msg.note <= NOTE_MAX:
-                        # Check last sent time for this note
-                        last_time = recent_notes[msg.note]
-                        if now - last_time > DEBOUNCE_MS:
-                            recent_notes[msg.note] = now
-                            msg.channel = 0  # Adjust channel for Melodics
-                            debug_print(f"[Maschine→Melodics] Forwarding {msg}")
+                        if msg.type == 'note_off' and NOTE_MIN <= msg.note <= NOTE_MAX:
+                            msg.channel = 0
+                            debug_print(f"[Maschine→Melodics] Forwarding NOTE_OFF {msg}")
                             outport.send(msg)
+
+                        elif msg.type in ['note_on', 'note_off'] and NOTE_MIN <= msg.note <= NOTE_MAX:
+                            last_time = recent_notes[msg.note]
+                            if now - last_time > DEBOUNCE_MS:
+                                recent_notes[msg.note] = now
+                                msg.channel = 0
+                                debug_print(f"[Maschine→Melodics] Forwarding {msg}")
+                                outport.send(msg)
+                            else:
+                                debug_print(f"[Maschine→Melodics] Skipped duplicate {msg}")
+
+                        elif msg.type == 'control_change':
+                            msg.channel = 0
+                            debug_print(f"[Maschine→Melodics] Forwarding CC {msg}")
+                            outport.send(msg)
+
+                        elif msg.type == 'sysex':
+                            debug_print(f"[Maschine→Melodics] Forwarding SysEx {msg}")
+                            outport.send(msg)
+
                         else:
-                            debug_print(f"[Maschine→Melodics] Skipped duplicate {msg}")
-                    elif msg.type == 'control_change':
-                        msg.channel = 0
-                        debug_print(f"[Maschine→Melodics] Forwarding CC {msg}")
-                        outport.send(msg)
-                    elif msg.type == 'sysex':
-                        debug_print(f"[Maschine→Melodics] Forwarding SysEx {msg}")
-                        outport.send(msg)
-                    else:
-                        debug_print(f"[Maschine→Melodics] Ignored {msg}")
-                time.sleep(0.001)
-    except KeyboardInterrupt:
-        debug_print("\n[Maschine→Melodics] Stopped.")
+                            debug_print(f"[Maschine→Melodics] Ignored {msg}")
+                    time.sleep(0.001)
+
+        except (OSError, IOError, EOFError) as e:
+            debug_print(f"❌ Maschine→Melodics port error: {e}")
+            debug_print("🔁 Retrying to open ports in 5 seconds...\n")
+            time.sleep(5)
+
+        except KeyboardInterrupt:
+            debug_print("\n[Maschine→Melodics] Stopped by user.")
+            break
+
 
 # Forwards from melodics to maschine
 def forward_to_maschine():
     """Listen to Melodics output and forward to Maschine output for pad lights."""
-    try:
-        with mido.open_input(melodics_out_port) as inport, mido.open_output(maschine_out_port) as outport:
-            debug_print(f"Listening on '{melodics_out_port}', forwarding to '{maschine_out_port}'...")
-            while True:
-                for msg in inport.iter_pending():
-                    debug_print(f"Forwarding: {msg}")
-                    outport.send(msg)
-                time.sleep(0.001)
-    except KeyboardInterrupt:
-        debug_print("\nExiting on user request.")
+    while True:
+        try:
+            with mido.open_input(melodics_out_port) as inport, mido.open_output(maschine_out_port) as outport:
+                debug_print(f"🎧 Listening on '{melodics_out_port}', forwarding to '{maschine_out_port}'...")
+                while True:
+                    for msg in inport.iter_pending():
+                        debug_print(f"[Melodics→Maschine] {msg}")
+                        outport.send(msg)
+                    time.sleep(0.001)
+        except (OSError, IOError, EOFError) as e:
+            debug_print(f"❌ Port disconnected or error occurred: {e}")
+            debug_print("🔁 Retrying to open ports in 5 seconds...\n")
+            time.sleep(5)
+        except KeyboardInterrupt:
+            debug_print("\n[Melodics→Maschine] Stopped by user.")
+            break
 
 if __name__ == "__main__":
     config = load_config()
