@@ -42,16 +42,6 @@ def load_config(path='config.json'):
     with open(path, 'r') as f:
         return json.load(f)
 
-# Installing dependencies from requirement.txt file
-def install_requirements():
-    try:
-        import mido, rtmidi  # Attempt to import
-    except ImportError:
-        print("🔧 Installing missing dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        print("✅ Done. Please restart the script.")
-        sys.exit()
-
 # Debugging logger
 def debug_print(*args, **kwargs):
     if DEBUG:
@@ -173,7 +163,6 @@ def forward_to_maschine():
         debug_print("\nExiting on user request.")
 
 if __name__ == "__main__":
-    install_requirements()
     config = load_config()
     maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port = find_ports()
 

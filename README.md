@@ -68,6 +68,10 @@ This script uses:
 
 - pip install mido python-rtmidi
 
+## OR
+
+- pip install -r requirements.txt
+
 ## Or use the built-in installer (see below).
 
 1. Clone this repo
@@ -94,12 +98,14 @@ This script uses:
     }
 }
 ```
+## Run the script
+
+- python melodics-maschine.py
+- NOTE: Maschine must be on, else script will throw error for missing port
 
 ### To enable debug output:
 
 - python melodics-maschine.py --debug
-
-- If required packages are missing, the script will install them automatically
   
 ## 🧠 How It Works
 
@@ -160,7 +166,7 @@ NOTE_MAX = 75  # Highest note (D#4)
 
 ## Background Tray App (.EXE Build for Windows)
 
-- You can convert this script into a Windows .exe app that:
+- You can convert melodics-maschine-tray.py script into a Windows .exe app that:
     - Runs in the background
     - Hides the terminal window
     - Shows a system tray icon

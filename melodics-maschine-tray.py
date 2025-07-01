@@ -90,14 +90,6 @@ def load_config(path='config.json'):
     with open(path, 'r') as f:
         return json.load(f)
 
-# Installing dependencies from requirement.txt file
-def install_requirements():
-    try:
-        import mido, rtmidi  # Attempt to import
-    except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        sys.exit()
-
 # Searches and sets required ports by config.json regexes
 def find_ports():
     global error_message
@@ -185,7 +177,6 @@ def forward_to_maschine():
         return
 
 if __name__ == "__main__":
-    install_requirements()
     mido.set_backend('mido.backends.rtmidi')
     config = load_config()
 
