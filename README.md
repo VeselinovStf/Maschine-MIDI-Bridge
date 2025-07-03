@@ -76,13 +76,6 @@ This script uses:
 
 - pip install -r requirements.txt
 
-## Or use the built-in installer (see below).
-
-1. Clone this repo
-2. Run the script:
-
-- python melodics-maschine.py
-
 ## Config
 - The CLI version of script needs config.json as source of configuration
     - DEBOUNCE_MS setting for port note read time 
@@ -105,7 +98,7 @@ This script uses:
 ## Run the script
 
 - python melodics-maschine.py
-- NOTE: Maschine must be on, else script will throw error for missing port
+- NOTE: If script is not detecting ports it will delay and try again
 
 ### To enable debug output:
 
@@ -135,7 +128,6 @@ maschine_out_port	Maschine MK3 Ctrl MIDI \d+	MIDI OUT
 
 ```
 
-- If any port can't be found, the script will raise an error and print which one is missing.
 
 ## 🧪 Debug Mode ( CLI version )
 
@@ -209,7 +201,7 @@ C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Start
 
 ## Melodics Setup
 
-- Create Template at or coppy the file from config_files/virtual-midi-bus.json 
+- Create Template at **or copy the file from config_files/virtual-midi-bus.json **
 
 ```
   C:\Users\<USER_NAME>\AppData\Local\Melodics\Melodics\devices
@@ -219,8 +211,8 @@ C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Start
 - In App: Select User device under Settings 
 
 ## 🧰 Troubleshooting
-- ❌ OSError: unknown port
 
+- ❌ OSError: unknown port
 - Make sure the loopMIDI or Maschine ports are created and visible before running the script.
 - Swithing Device in Melodics may result with loopMidi muted channel - close the app, restart chanell 
 
