@@ -52,19 +52,19 @@ def debug_print(*args, **kwargs):
 def find_ports(retry_interval=5):
     """Continuously tries to find the MIDI ports defined in config.json."""
 
-    debug_print("🎹 Available input ports:")
-    for p in input_ports:
-        debug_print(f"  - {p}")
-
-    debug_print("🎛 Available output ports:")
-    for p in output_ports:
-        debug_print(f"  - {p}")
-
     patterns = config['patterns']
 
     while True:
         input_ports = mido.get_input_names()
         output_ports = mido.get_output_names()
+
+        debug_print("🎹 Available input ports:")
+        for p in input_ports:
+            debug_print(f"  - {p}")
+
+        debug_print("🎛 Available output ports:")
+        for p in output_ports:
+            debug_print(f"  - {p}")
 
         # Try to match ports
         maschine_in_port = next((p for p in input_ports if re.match(patterns['maschine_in_port'], p)), None)
