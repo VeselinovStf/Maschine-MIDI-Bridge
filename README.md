@@ -26,6 +26,10 @@ This script bridges MIDI communication between Native Instruments **Maschine MK3
 - Get visual pad feedback (lights) from Melodics back to Maschine.
 - Auto-detect ports, optionally show debug output, and self-install dependencies.
 
+
+## Disclaimer
+- This project is not affiliated with or endorsed by Melodics.
+
 ## Links
 - [Chopin method](https://www.youtube.com/watch?v=ctWUmDLATJw&embeds_referring_euri=https%3A%2F%2Ftonesharp.com%2F&source_ve_path=Mjg2NjY)
 - [Blog post](https://tonesharp.com/blog/2025/05/31/finger-drumming-pad-hitting-techniques)
@@ -205,7 +209,7 @@ C:\Users\<USER_NAME>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Start
 
 ## Melodics Setup
 
-- Create Template at: 
+- Create Template at or coppy the file from config_files/virtual-midi-bus.json 
 
 ```
   C:\Users\<USER_NAME>\AppData\Local\Melodics\Melodics\devices

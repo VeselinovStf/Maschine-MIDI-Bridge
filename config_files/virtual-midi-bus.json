@@ -1,0 +1,389 @@
+{
+    "version": 3,
+    "name": "Virtual MIDI Bus",
+    "layouts": [
+      { "instrument": "pads", "layout": "4x4" }
+    ],
+  "support": "support-articles/support-setup-maschine.php",
+  "controls_image": "https://web-cdn.melodics.com/hardware/ni-maschine-mk2.png",
+  "ports": {
+    "mac_regex": "^IAC Driver.*$",
+    "win_regex": "^loopMIDI IN.*$"
+},
+  "outports": {
+    "mac": "Maschine MK3 Virtual Output",
+    "win": "loopMIDI OUT"
+  },
+    "surrounds": [
+        {
+          "placement": "left",
+          "image": "image://styledimage/maschine-mk3.svg/",
+          "width": 820,
+          "height": 700,
+          "tooltips": [
+            {
+               "text": "back to pre-play",
+               "orientation": "TOP",
+               "x": 480,
+               "y": 590
+            },
+            {
+              "text": "start / next",
+              "orientation": "BOTTOM",
+              "x": 60,
+              "y": 665
+            },
+            {
+              "text": "listen to step",
+              "orientation": "BOTTOM",
+              "x": 720,
+              "y": 575
+            },
+            {
+              "text": "next step",
+              "orientation": "BOTTOM",
+              "x": 340,
+              "y": 590
+            },
+            {
+              "text": "prev step",
+              "orientation": "TOP",
+              "x": 200,
+              "y": 590
+            },
+            {
+              "text": "replay",
+              "orientation": "TOP",
+              "x": 60,
+              "y": 590
+            }
+          ]
+        }
+    ],
+  "initial_messages": [
+    { "instrument": "pads", "messages": [
+      [176, 108, 127],
+      [176, 9, 127],
+      [176, 107, 127], 
+      [176, 104, 127],
+      [176, 98, 127],
+      [176, 118, 127]
+    ]}
+  ],
+  "inputs": [
+    { "instrument": "pads", "channel": 1, "note": 57, "events": [ { "type": "ControlChange", "message": "SPACE" } ] },
+    { "instrument": "pads", "channel": 1, "note": 53, "events": [ { "type": "ControlChange", "message": "RETURN" } ] },
+    { "instrument": "pads", "channel": 1, "note": 56, "events": [ { "type": "ControlChange", "message": "ESC" } ] },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 85,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "["
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 86,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "]"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 89,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": ";"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 90,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "'"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 72,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "M"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 70,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "-"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 71,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "="
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 46,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "ENTER"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 30,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "UP"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 32,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "DOWN"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 33,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "LEFT"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 31,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "RIGHT"
+        }
+      ]
+    },
+    {
+      "instrument": "pads",
+      "channel": 1,
+      "note": 41,
+      "events": [
+        {
+          "type": "ControlChange",
+          "message": "ENTER"
+        }
+      ]
+    },
+	{ "instrument": "pads", "channel": 1, "note": 54, "events": [ { "type": "ControlChange", "message": "-" }, { "type": "ControlChange", "message": "UP" }, { "type": "ControlChange", "message": "'" } ] },
+	{ "instrument": "pads", "channel": 1, "note": 54, "events": [ { "type": "ControlChange", "message": "-" }, { "type": "ControlChange", "message": "UP" }, { "type": "ControlChange", "message": "'" } ] },
+    { "instrument": "pads", "channel": 1, "note": 60, "events": [ { "type": "ControlChange", "message": "=" }, { "type": "ControlChange", "message": "DOWN" }, { "type": "ControlChange", "message": "[" }  ] },
+	{ "instrument": "pads", "channel": 1, "note": 91, "events": [ { "type": "ControlChange", "message": "\\" }, { "type": "ControlChange", "message": "RIGHT" } ] },
+	
+
+    { "instrument": "pads", "channel": 1, "note": 60, "events": [ { "type": "NoteOn", "message": "Pad11" }, { "type": "NoteOff", "message": "Pad11" } ] },
+    { "instrument": "pads", "channel": 1, "note": 61, "events": [ { "type": "NoteOn", "message": "Pad12" }, { "type": "NoteOff", "message": "Pad12" } ] },
+    { "instrument": "pads", "channel": 1, "note": 62, "events": [ { "type": "NoteOn", "message": "Pad13" }, { "type": "NoteOff", "message": "Pad13" } ] },
+    { "instrument": "pads", "channel": 1, "note": 63, "events": [ { "type": "NoteOn", "message": "Pad14" }, { "type": "NoteOff", "message": "Pad14" } ] },
+    { "instrument": "pads", "channel": 1, "note": 64, "events": [ { "type": "NoteOn", "message": "Pad21" }, { "type": "NoteOff", "message": "Pad21" } ] },
+    { "instrument": "pads", "channel": 1, "note": 65, "events": [ { "type": "NoteOn", "message": "Pad22" }, { "type": "NoteOff", "message": "Pad22" } ] },
+    { "instrument": "pads", "channel": 1, "note": 66, "events": [ { "type": "NoteOn", "message": "Pad23" }, { "type": "NoteOff", "message": "Pad23" } ] },
+    { "instrument": "pads", "channel": 1, "note": 67, "events": [ { "type": "NoteOn", "message": "Pad24" }, { "type": "NoteOff", "message": "Pad24" } ] },
+    { "instrument": "pads", "channel": 1, "note": 68, "events": [ { "type": "NoteOn", "message": "Pad31" }, { "type": "NoteOff", "message": "Pad31" } ] },
+    { "instrument": "pads", "channel": 1, "note": 69, "events": [ { "type": "NoteOn", "message": "Pad32" }, { "type": "NoteOff", "message": "Pad32" } ] },
+    { "instrument": "pads", "channel": 1, "note": 70, "events": [ { "type": "NoteOn", "message": "Pad33" }, { "type": "NoteOff", "message": "Pad33" } ] },
+    { "instrument": "pads", "channel": 1, "note": 71, "events": [ { "type": "NoteOn", "message": "Pad34" }, { "type": "NoteOff", "message": "Pad34" } ] },
+    { "instrument": "pads", "channel": 1, "note": 72, "events": [ { "type": "NoteOn", "message": "Pad41" }, { "type": "NoteOff", "message": "Pad41" } ] },
+    { "instrument": "pads", "channel": 1, "note": 73, "events": [ { "type": "NoteOn", "message": "Pad42" }, { "type": "NoteOff", "message": "Pad42" } ] },
+    { "instrument": "pads", "channel": 1, "note": 74, "events": [ { "type": "NoteOn", "message": "Pad43" }, { "type": "NoteOff", "message": "Pad43" } ] },
+    { "instrument": "pads", "channel": 1, "note": 75, "events": [ { "type": "NoteOn", "message": "Pad44" }, { "type": "NoteOff", "message": "Pad44" } ] }
+  ],
+  "outputs": {
+    "Pad11": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 60, "velocity": 20 } ] }
+    ],
+    "Pad12": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 61, "velocity": 20 } ] }
+    ],
+    "Pad13": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 62, "velocity": 20 } ] }
+    ],
+    "Pad14": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 63, "velocity": 20 } ] }
+    ],
+    "Pad21": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 64, "velocity": 20 } ] }
+    ],
+    "Pad22": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 65, "velocity": 20 } ] }
+    ],
+    "Pad23": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 66, "velocity": 20 } ] }
+    ],
+    "Pad24": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 67, "velocity": 20 } ] }
+    ],
+    "Pad31": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 68, "velocity": 20 } ] }
+    ],
+    "Pad32": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 69, "velocity": 20 } ] }
+    ],
+    "Pad33": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 70, "velocity": 20 } ] }
+    ],
+    "Pad34": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 71, "velocity": 20 } ] }
+    ],
+    "Pad41": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 72, "velocity": 20 } ] }
+    ],
+    "Pad42": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 73, "velocity": 20 } ] }
+    ],
+    "Pad43": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 74, "velocity": 20 } ] }
+    ],
+    "Pad44": [
+      { "state": "Early",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 14 } ] },
+      { "state": "Perfect",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 30 } ] },
+      { "state": "Late",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 50 } ] },
+      { "state": "Missed",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 6 } ] },
+      { "state": "Off",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 0 } ] },
+      { "state": "Active_Left",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 40 } ] },
+      { "state": "Active_Right",   "midi": [ { "type": "NoteOn", "channel": 1, "note": 75, "velocity": 20 } ] }
+    ]
+  }
+}
