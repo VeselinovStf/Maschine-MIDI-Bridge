@@ -83,8 +83,8 @@ def forward_to_app():
     NOTE_MIN = config.get("NOTE_MIN", 48)
     NOTE_MAX = config.get("NOTE_MAX", 75)
 
-    # Track currently active HIT notes to prevent duplicate sending
-    active_hits = set()
+    # Track currently active notes (HIT or PRESS) to prevent duplicate sending
+    active_notes = set()
 
     while True:
         try:
@@ -104,54 +104,26 @@ def forward_to_app():
                             debug_print(f"[IGNORED] {msg}")
                             continue
 
-                        # ------------------------
-                        # HIT channel
-                        # ------------------------
-                        if msg.channel == CHANNEL_HIT:
-                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
-                                if msg.type == "note_on":
-                                    if msg.note not in active_hits:
-                                        msg.channel = 0
-                                        outport.send(msg)
-                                        debug_print(f"🥁 [HIT] note_on {msg.note} vel={msg.velocity}")
-                                        active_hits.add(msg.note)
-                                elif msg.type == "note_off":
-                                    if msg.note in active_hits:
-                                        msg.channel = 0
-                                        outport.send(msg)
-                                        debug_print(f"🥁 [HIT] note_off {msg.note}")
-                                        active_hits.remove(msg.note)
-                            else:
-                                # Forward any other HIT message
-                                msg.channel = 0
-                                outport.send(msg)
-                                debug_print(f"🥁 [HIT MSG] {msg}")
+                        if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
 
-                        # ------------------------
-                        # PRESS channel
-                        # ------------------------
-                        elif msg.channel == CHANNEL_PRESS:
-                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
-                                if msg.note not in active_hits:
+                            if msg.type == "note_on":
+                                if msg.note not in active_notes:
                                     msg.channel = 0
                                     outport.send(msg)
-                                    debug_print(f"👉 [PRESS] {msg.note} vel={msg.velocity}")
-                            else:
-                                msg.channel = 0
-                                outport.send(msg)
-                                debug_print(f"👉 [PRESS] {msg.note} vel={getattr(msg, 'velocity', 'N/A')}")
+                                    active_notes.add(msg.note)
+                                    debug_print(f"🎹 [NOTE ON] note {msg.note} vel={msg.velocity}")
+                            elif msg.type == "note_off":
+                                if msg.note in active_notes:
+                                    msg.channel = 0
+                                    outport.send(msg)
+                                    active_notes.remove(msg.note)
+                                    debug_print(f"🎹 [NOTE OFF] note {msg.note}")
 
-                        # ------------------------
-                        # Other messages
-                        # ------------------------
-                        elif msg.type == "control_change":
+                        # Forward other messages (CC / SysEx) without duplication
+                        elif msg.type in ["control_change", "sysex"]:
                             msg.channel = 0
                             outport.send(msg)
-                            debug_print(f"[CC] {msg}")
-
-                        elif msg.type == "sysex":
-                            outport.send(msg)
-                            debug_print(f"[SysEx] {msg}")
+                            debug_print(f"[OTHER] {msg}")
 
                     time.sleep(0.001)
 
@@ -159,6 +131,7 @@ def forward_to_app():
             debug_print(f"❌ Port error: {e}")
             debug_print("🔁 Retrying in 5 seconds...")
             time.sleep(5)
+
 
 # Forwards from melodics to maschine
 def forward_to_maschine():

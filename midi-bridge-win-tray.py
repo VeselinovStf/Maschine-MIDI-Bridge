@@ -26,6 +26,7 @@ maschine_out_port = None
 error_message = None
 threads = []  # Track running threads
 LOG_FILE = "midi-bridge-win-tray.log"
+dark_mode = False
 
 # ---------------------------------------------------------------------
 # Logging
@@ -97,17 +98,21 @@ def setup_tray():
             root.destroy()
 
     def start_normal(icon, item):
+        global dark_mode
         if not listening["running"]:
             listening["running"] = True
             listening["mode"] = "Normal"
-            start_listening(normal_mode=True)
+            dark_mode = False
+            start_listening()
             update_menu(icon)
     
     def start_dark(icon, item):
+        global dark_mode
         if not listening["running"]:
             listening["running"] = True
             listening["mode"] = "Dark"
-            start_listening(normal_mode=False)
+            dark_mode = True
+            start_listening()
             update_menu(icon)
 
     def stop_listening(icon, item):
@@ -185,74 +190,78 @@ def find_ports(retry_interval=5):
 # MIDI Forwarding
 # ---------------------------------------------------------------------
 def forward_to_app():
+    """
+    Forward Maschine HIT (channel 1) and PRESS (channel 2) events to Melodics.
+    Handles multiple pads simultaneously, avoids double hits when HIT+PRESS occur.
+    """
+
     CHANNEL_HIT = config.get("CHANNEL_HIT", 0)
     CHANNEL_PRESS = config.get("CHANNEL_PRESS", 1)
     CHANNEL_APP_SEND = config.get("CHANNEL_APP_SEND", 0)
     NOTE_MIN = config.get("NOTE_MIN", 48)
     NOTE_MAX = config.get("NOTE_MAX", 75)
-    active_hits = set()
+
+    # Track currently active notes (HIT or PRESS) to prevent duplicate sending
+    active_notes = set()
 
     while True:
         try:
             with mido.open_input(maschine_in_port) as inport, \
                  mido.open_output(melodics_in_port) as outport:
 
+                log_debug(f"🎧 Listening '{maschine_in_port}' → '{melodics_in_port}' (multi-pad safe)")
+
                 while True:
                     for msg in inport.iter_pending():
+                        # Convert note_on velocity=0 -> note_off
                         if msg.type == "note_on" and msg.velocity == 0:
                             msg = mido.Message("note_off", note=msg.note, velocity=0, channel=msg.channel)
+
                         if not hasattr(msg, "channel"):
                             continue
 
-                        # Default: send everything unless filtered
-                        forwarded = False
-
-                        # HIT
-                        if msg.channel == CHANNEL_HIT:
-                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
-                                if msg.type == "note_on" and msg.note not in active_hits:
+                        # Forward HIT or PRESS notes within range, avoiding duplicates
+                        if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
+                            if msg.type == "note_on":
+                                if msg.note not in active_notes:
                                     msg.channel = CHANNEL_APP_SEND
                                     outport.send(msg)
-                                    active_hits.add(msg.note)
-                                    log_debug(f"[HIT] note_on {msg.note} vel={msg.velocity}")
-                                    forwarded = True
-                                elif msg.type == "note_off" and msg.note in active_hits:
+                                    active_notes.add(msg.note)
+                                    log_debug(f"[NOTE ON] {msg.note} vel={msg.velocity}")
+                            elif msg.type == "note_off":
+                                if msg.note in active_notes:
                                     msg.channel = CHANNEL_APP_SEND
                                     outport.send(msg)
-                                    active_hits.remove(msg.note)
-                                    log_debug(f"[HIT] note_off {msg.note}")
-                                    forwarded = True
-                        # PRESS
-                        elif msg.channel == CHANNEL_PRESS:
-                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX and msg.note not in active_hits:
+                                    active_notes.remove(msg.note)
+                                    log_debug(f"[NOTE OFF] {msg.note}")
+                        else:
+                            # Forward other messages (control_change, sysex, out-of-range notes)
+                            if msg.type in ["note_on", "note_off", "control_change", "sysex"]:
                                 msg.channel = CHANNEL_APP_SEND
                                 outport.send(msg)
-                                log_debug(f"[PRESS] {msg.note} vel={msg.velocity}")
-                                forwarded = True
-                        # Other messages (catch-all for notes outside HIT/PRESS)
-                        if not forwarded:
-                           if msg.type in ["note_on", "note_off", "control_change", "sysex"]:
-                               msg.channel = CHANNEL_APP_SEND
-                               outport.send(msg)
-                               log_debug(f"[FORWARDED OTHER] {msg}")
+                                log_debug(f"[FORWARDED OTHER] {msg}")
 
                     time.sleep(0.001)
+
         except Exception as e:
             global error_message
             error_message = str(e)
             log(f"Port error: {error_message}")
+            log_debug("🔁 Retrying in 5 seconds...")
             time.sleep(5)
 
 def forward_to_maschine():
+    global dark_mode
     try:
         with mido.open_input(melodics_out_port) as inport, mido.open_output(maschine_out_port) as outport:
             while True:
                 for msg in inport.iter_pending():
-                    outport.send(msg)
-                    log_debug(f"[Melodics -> Maschine] {msg}")
+                    # Always forward note_on/note_off in normal mode
+                    if not dark_mode:
+                        outport.send(msg)
+                        log_debug(f"[Normal Mode] Melodics -> Maschine: {msg}")
+
                 time.sleep(0.001)
-    except KeyboardInterrupt:
-        return
     except Exception as e:
         global error_message
         error_message = str(e)
@@ -261,17 +270,18 @@ def forward_to_maschine():
 # ---------------------------------------------------------------------
 # Start threads
 # ---------------------------------------------------------------------
-def start_listening(normal_mode=True):
+def start_listening():
     global threads
     if not threads:
         t_app = threading.Thread(target=forward_to_app, daemon=True)
         threads.append(t_app)
         t_app.start()
-        if normal_mode:
-            t_masch = threading.Thread(target=forward_to_maschine, daemon=True)
-            threads.append(t_masch)
-            t_masch.start()
-        log(f"Listening started ({'Normal' if normal_mode else 'Dark'} mode)")
+        
+        t_masch = threading.Thread(target=forward_to_maschine, daemon=True)
+        threads.append(t_masch)
+        t_masch.start()
+        
+        log(f"Listening started ({'Normal' if not dark_mode else 'Dark'} mode)")
 
 # ---------------------------------------------------------------------
 # Main
