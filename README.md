@@ -60,6 +60,23 @@ This script bridges MIDI communication between Native Instruments **Maschine MK3
   
 ## 📦 Requirements
 
+- Fix: Install Microsoft C++ Build Tools
+- You need to install the MSVC compiler, because your system currently has none of these:
+    - icl
+    - cl
+    - g++
+    - clang++
+
+1. Install Build Tools
+
+- Download from Microsoft: Microsoft Build Tools 2022 (search “Build Tools for Visual Studio 2022”)
+- During installation, check these workloads:
+    - ✔ Desktop development with C++
+    - ✔ Under “Individual components”, add:
+    - MSVC v143 toolset
+    - Windows 10/11 SDK
+    - CMake (optional but recommended)
+
 This script uses:
 
 - Python 3.7+
