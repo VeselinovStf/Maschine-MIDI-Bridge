@@ -1,5 +1,8 @@
 {
-    "DEBOUNCE_MS": 0.04,
+    "CHANNEL_HIT": 0,
+    "CHANNEL_PRESS" : 1,
+    "CHANNEL_APP_SEND": 0,
+    "DEBUG": false,
     "NOTE_MIN": 48,
     "NOTE_MAX": 75,
     "patterns": {
