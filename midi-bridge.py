@@ -71,109 +71,106 @@ def find_ports(retry_interval=5):
 # ---------------------------------------------------------------------
 #   MODIFIED FUNCTION — ONLY PRINT CHANNEL 2 (MIDO CHANNEL 1) MESSAGES
 # ---------------------------------------------------------------------
-import time
-import mido
+def forward_to_app():
+    """
+    Forward Maschine HIT (channel 1) and PRESS (channel 2) events to Melodics.
+    Handles multiple pads simultaneously, avoids double hits when HIT+PRESS occur.
+    """
 
-def forward_to():
-    """Forward Maschine HIT and PRESS events to Melodics, without debounce."""
+    CHANNEL_HIT = 0      # Maschine channel 1
+    CHANNEL_PRESS = 1    # Maschine channel 2
 
-    CHANNEL_HIT = 0     # Maschine Pad Hit (channel 1)
-    CHANNEL_PRESS = 1   # Maschine Press (channel 2)
+    NOTE_MIN = config.get("NOTE_MIN", 48)
+    NOTE_MAX = config.get("NOTE_MAX", 75)
 
-    # Prevent HIT and PRESS from same tap being forwarded twice
-    LAST_EVENT_GAP = 0.020  # 20ms
-    last_event_time = 0
-
-    NOTE_MIN = config.get('NOTE_MIN', 48)
-    NOTE_MAX = config.get('NOTE_MAX', 75)
+    # Track currently active HIT notes to prevent duplicate sending
+    active_hits = set()
 
     while True:
         try:
             with mido.open_input(maschine_in_port) as inport, \
                  mido.open_output(melodics_in_port) as outport:
 
-                debug_print(f"🎧 Listening '{maschine_in_port}' → '{melodics_in_port}' (no debounce)...\n")
+                debug_print(f"🎧 Listening '{maschine_in_port}' → '{melodics_in_port}' (multi-pad safe)")
 
                 while True:
                     for msg in inport.iter_pending():
 
-                        now = time.time()
-
                         # Convert note_on velocity=0 -> note_off
                         if msg.type == "note_on" and msg.velocity == 0:
-                            msg = mido.Message("note_off", note=msg.note, velocity=0,
-                                               channel=msg.channel)
+                            msg = mido.Message("note_off", note=msg.note, velocity=0, channel=msg.channel)
 
-                        # ------------------------------------------------------------------
-                        #   GLOBAL GAP: avoid PRESS+HIT firing instantly together
-                        # ------------------------------------------------------------------
-                        if now - last_event_time < LAST_EVENT_GAP:
+                        if not hasattr(msg, "channel"):
+                            debug_print(f"[IGNORED] {msg}")
                             continue
 
-                        # ===============================================================
-                        #   HIT (channel 0)
-                        # ===============================================================
-                        if hasattr(msg, "channel") and msg.channel == CHANNEL_HIT:
+                        # ------------------------
+                        # HIT channel
+                        # ------------------------
+                        if msg.channel == CHANNEL_HIT:
+                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
+                                if msg.type == "note_on":
+                                    if msg.note not in active_hits:
+                                        msg.channel = 0
+                                        outport.send(msg)
+                                        debug_print(f"🥁 [HIT] note_on {msg.note} vel={msg.velocity}")
+                                        active_hits.add(msg.note)
+                                elif msg.type == "note_off":
+                                    if msg.note in active_hits:
+                                        msg.channel = 0
+                                        outport.send(msg)
+                                        debug_print(f"🥁 [HIT] note_off {msg.note}")
+                                        active_hits.remove(msg.note)
+                            else:
+                                # Forward any other HIT message
+                                msg.channel = 0
+                                outport.send(msg)
+                                debug_print(f"🥁 [HIT MSG] {msg}")
 
-                            if msg.type == "note_on" and msg.velocity > 0:
-                                if NOTE_MIN <= msg.note <= NOTE_MAX:
+                        # ------------------------
+                        # PRESS channel
+                        # ------------------------
+                        elif msg.channel == CHANNEL_PRESS:
+                            if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
+                                if msg.note not in active_hits:
                                     msg.channel = 0
-                                    debug_print(f"🥁 [HIT→Melodics] {msg}")
                                     outport.send(msg)
-                                    last_event_time = now
-                                continue
-
-                            elif msg.type == "note_off":
-                                if NOTE_MIN <= msg.note <= NOTE_MAX:
-                                    msg.channel = 0
-                                    debug_print(f"🥁 [RELEASE→Melodics] {msg}")
-                                    outport.send(msg)
-                                    last_event_time = now
-                                continue
-
+                                    debug_print(f"👉 [PRESS] {msg.note} vel={msg.velocity}")
                             else:
                                 msg.channel = 0
-                                debug_print(f"🥁 [HIT MSG→Melodics] {msg}")
                                 outport.send(msg)
-                                last_event_time = now
-                                continue
+                                debug_print(f"👉 [PRESS] {msg.note} vel={getattr(msg, 'velocity', 'N/A')}")
 
-                        # ===============================================================
-                        #   PRESS (channel 1)
-                        # ===============================================================
-                        elif hasattr(msg, "channel") and msg.channel == CHANNEL_PRESS:
-
-                            msg.channel = 0
-                            debug_print(f"👉 [PRESS→Melodics] {msg}")
-                            outport.send(msg)
-                            last_event_time = now
-                            continue
-
-                        # ===============================================================
-                        #   OTHER MESSAGES
-                        # ===============================================================
+                        # ------------------------
+                        # Other messages
+                        # ------------------------
                         elif msg.type == "control_change":
                             msg.channel = 0
-                            debug_print(f"[CC→Melodics] {msg}")
                             outport.send(msg)
-                            last_event_time = now
-                            continue
+                            debug_print(f"[CC] {msg}")
 
                         elif msg.type == "sysex":
-                            debug_print(f"[SysEx→Melodics] {msg}")
                             outport.send(msg)
-                            last_event_time = now
-                            continue
-
-                        else:
-                            debug_print(f"[IGNORED] {msg}")
+                            debug_print(f"[SysEx] {msg}")
 
                     time.sleep(0.001)
 
         except Exception as e:
             debug_print(f"❌ Port error: {e}")
-            debug_print("🔁 Retrying in 5 seconds...\n")
+            debug_print("🔁 Retrying in 5 seconds...")
             time.sleep(5)
+
+# Forwards from melodics to maschine
+def forward_to_maschine():
+    """Listen to Melodics output and forward to Maschine output for pad lights."""
+    try:
+        with mido.open_input(melodics_out_port) as inport, mido.open_output(maschine_out_port) as outport:
+            while True:
+                for msg in inport.iter_pending():
+                    outport.send(msg)
+                time.sleep(0.001)
+    except KeyboardInterrupt:
+        return
 
 # ---------------------------------------------------------------------
 
@@ -181,16 +178,16 @@ if __name__ == "__main__":
     config = load_config()
     maschine_in_port, melodics_in_port, melodics_out_port, maschine_out_port = find_ports()
 
-    # Start both MIDI forwarding threads
-    t1 = threading.Thread(target=forward_to, daemon=True)
-    t2 = threading.Thread(target=forward_to, daemon=True)
-    
-    t1.start()
-    t2.start()
+    # Start thread that prints channel-2 only
+    app_thread = threading.Thread(target=forward_to_app, daemon=True)
+    maschine_thread = threading.Thread(target=forward_to_maschine, daemon=True)
 
-    debug_print("Running MIDI forwarders. Press Ctrl+C to exit.")
+    app_thread.start()
+    maschine_thread.start()
+
+    debug_print("Running. Press Ctrl+C to exit.")
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        debug_print("\nExiting program.")
+        print("\nExiting program.")
