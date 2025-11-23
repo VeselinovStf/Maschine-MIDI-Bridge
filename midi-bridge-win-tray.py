@@ -192,7 +192,7 @@ def find_ports(retry_interval=5):
 def forward_to_app():
     """
     Forward Maschine HIT (channel 1) and PRESS (channel 2) events to Melodics.
-    Handles multiple pads simultaneously, avoids double hits when HIT+PRESS occur.
+    Handles multiple pads and avoids double hits (debounce).
     """
 
     CHANNEL_HIT = config.get("CHANNEL_HIT", 0)
@@ -201,7 +201,10 @@ def forward_to_app():
     NOTE_MIN = config.get("NOTE_MIN", 48)
     NOTE_MAX = config.get("NOTE_MAX", 75)
 
-    # Track currently active notes (HIT or PRESS) to prevent duplicate sending
+    DEBOUNCE_MS = config.get("DEBOUNCE_MS", 0.04)   # same as first version
+    recent_notes = defaultdict(lambda: 0)
+
+    monotonic = time.monotonic
     active_notes = set()
 
     while True:
@@ -209,25 +212,41 @@ def forward_to_app():
             with mido.open_input(maschine_in_port) as inport, \
                  mido.open_output(melodics_in_port) as outport:
 
-                log_debug(f"🎧 Listening '{maschine_in_port}' → '{melodics_in_port}' (multi-pad safe)")
+                log_debug(f"🎧 Listening '{maschine_in_port}' → '{melodics_in_port}'")
 
                 while True:
+                    now = monotonic()
+
                     for msg in inport.iter_pending():
-                        # Convert note_on velocity=0 -> note_off
+
+                        # Convert note_on velocity=0 → note_off
                         if msg.type == "note_on" and msg.velocity == 0:
                             msg = mido.Message("note_off", note=msg.note, velocity=0, channel=msg.channel)
 
                         if not hasattr(msg, "channel"):
                             continue
 
-                        # Forward HIT or PRESS notes within range, avoiding duplicates
+                        # Only HIT/PRESS notes
                         if hasattr(msg, "note") and NOTE_MIN <= msg.note <= NOTE_MAX:
+
+                            last_time = recent_notes[msg.note]
+
+                            # === DEBOUNCE BLOCK ===
+                            if now - last_time < DEBOUNCE_MS:
+                                continue  # skip duplicate hit
+                            recent_notes[msg.note] = now
+                            # =======================
+
+                            # NOTE ON
                             if msg.type == "note_on":
                                 if msg.note not in active_notes:
                                     msg.channel = CHANNEL_APP_SEND
+                                    # Replace static 127 with dynamic later
+                                    msg.velocity = 127 # Press value is static. In order to be same here value 127 is hardcoded.
                                     outport.send(msg)
                                     active_notes.add(msg.note)
                                     log_debug(f"[NOTE ON] {msg.note} vel={msg.velocity}")
+                            # NOTE OFF
                             elif msg.type == "note_off":
                                 if msg.note in active_notes:
                                     msg.channel = CHANNEL_APP_SEND
@@ -235,13 +254,13 @@ def forward_to_app():
                                     active_notes.remove(msg.note)
                                     log_debug(f"[NOTE OFF] {msg.note}")
                         else:
-                            # Forward other messages (control_change, sysex, out-of-range notes)
+                            # Forward other messages (CC, sysex)
                             if msg.type in ["note_on", "note_off", "control_change", "sysex"]:
                                 msg.channel = CHANNEL_APP_SEND
                                 outport.send(msg)
                                 log_debug(f"[FORWARDED OTHER] {msg}")
 
-                    time.sleep(0.001)
+                    time.sleep(0)
 
         except Exception as e:
             global error_message

@@ -25,7 +25,7 @@ It allows Maschine to behave as it does in its native environment, while fully f
 - Forward pad hits from Maschine to Melodics  
 - Normal Mode - Return visual pad feedback (lights) from Melodics to Maschine  
 - Dark Mode - Stop pad colouring from Melodics    
-- Configurable note ranges, ports
+- Configurable note ranges, ports, debaunce value
 
 ## Config File
 
@@ -112,6 +112,7 @@ The script requires a config file for port names, note ranges, and debounce timi
 
 ```json
 {
+    "DEBOUNCE_MS": 0.0170,
     "CHANNEL_HIT": 0,
     "CHANNEL_PRESS" : 1,
     "CHANNEL_APP_SEND": 0,

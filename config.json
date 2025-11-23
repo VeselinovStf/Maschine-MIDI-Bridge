@@ -1,4 +1,5 @@
 {
+    "DEBOUNCE_MS": 0.0170,
     "CHANNEL_HIT": 0,
     "CHANNEL_PRESS" : 1,
     "CHANNEL_APP_SEND": 0,
