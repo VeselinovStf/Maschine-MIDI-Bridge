@@ -113,8 +113,6 @@ The script requires a config file for port names, note ranges, and debounce timi
 ```json
 {
     "DEBOUNCE_MS": 0.0170,
-    "CHANNEL_HIT": 0,
-    "CHANNEL_PRESS" : 1,
     "CHANNEL_APP_SEND": 0,
     "DEBUG": false,
     "NOTE_MIN": 48,

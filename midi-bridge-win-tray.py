@@ -195,8 +195,6 @@ def forward_to_app():
     Handles multiple pads and avoids double hits (debounce).
     """
 
-    CHANNEL_HIT = config.get("CHANNEL_HIT", 0)
-    CHANNEL_PRESS = config.get("CHANNEL_PRESS", 1)
     CHANNEL_APP_SEND = config.get("CHANNEL_APP_SEND", 0)
     NOTE_MIN = config.get("NOTE_MIN", 48)
     NOTE_MAX = config.get("NOTE_MAX", 75)
